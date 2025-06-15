@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, Alert, StyleSheet, ScrollView, Permission
 import { Guitar, Mic, MicOff, Volume2, VolumeX } from 'lucide-react-native'
 import { PitchDetector } from 'react-native-pitch-detector'
 
-// Importacion de los componentes reutilizables
 import TunerDisplay from '../components/TunerDisplay'
 import StringSelector from '../components/StringSelector'
 
@@ -42,7 +41,6 @@ export default function GuitarTunerScreen() {
 
   useEffect(() => {
     return () => {
-      // cleanup on unmount
       PitchDetector.stop()
       PitchDetector.removeListener()
     }
@@ -56,7 +54,7 @@ export default function GuitarTunerScreen() {
     }
 
     PitchDetector.addListener(({ frequency, tone }) => {
-      console.log('Frecuencia detectada:', frequency, 'Tono detectado:', tone)  // <--- Agregado console.log aquí
+      console.log('Frecuencia detectada:', frequency, 'Tono detectado:', tone)
       setDetectedFrequency(frequency)
       setDetectedTone(tone)
     })
@@ -91,11 +89,19 @@ export default function GuitarTunerScreen() {
 
   const handleStringSelect = (note: string) => {
     setTargetNote(note)
-    Alert.alert(`Cuerda seleccionada: ${note}`)
   }
 
   const selectedString = guitarStrings.find(s => s.name === targetNote)
   const targetFrequency = selectedString ? selectedString.frequency : 0
+
+  const getTuningAccuracy = (detected: number, target: number): number => {
+    if (!detected || !target) return 0
+    return 1200 * Math.log2(detected / target)
+  }
+
+  const tuningAccuracy = detectedFrequency && targetFrequency
+    ? getTuningAccuracy(detectedFrequency, targetFrequency)
+    : 0
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -107,7 +113,7 @@ export default function GuitarTunerScreen() {
         <TunerDisplay
           currentNote={detectedTone || targetNote}
           targetNote={targetNote}
-          tuningAccuracy={0} // puedes calcular la diferencia entre detectedFrequency y targetFrequency para esto
+          tuningAccuracy={tuningAccuracy}
           frequency={detectedFrequency || 0}
           isListening={isListening}
         />

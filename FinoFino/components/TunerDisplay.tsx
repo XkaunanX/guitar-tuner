@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { View, Text, Animated, StyleSheet } from "react-native"
+
+const needleHeight = 96
 
 interface TunerDisplayProps {
   currentNote: string
@@ -17,36 +19,49 @@ export default function TunerDisplay({
   isListening,
 }: TunerDisplayProps) {
   const clampedAccuracy = Math.max(-50, Math.min(50, tuningAccuracy))
-  const needleRotation = (clampedAccuracy / 50) * 45 // -45° a 45°
+  const rotationValue = useRef(new Animated.Value(clampedAccuracy)).current
 
   const [statusText, setStatusText] = useState("Esperando...")
   const [statusColor, setStatusColor] = useState("#94A3B8") // slate-400
 
   useEffect(() => {
+    Animated.spring(rotationValue, {
+      toValue: clampedAccuracy,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 7,
+    }).start()
+  }, [clampedAccuracy])
+
+  const rotate = rotationValue.interpolate({
+    inputRange: [-50, 0, 50],
+    outputRange: ["-45deg", "0deg", "45deg"],
+    extrapolate: "clamp",
+  })
+
+  useEffect(() => {
     if (!isListening) {
       setStatusText("Esperando...")
-      setStatusColor("#94A3B8") // slate-400
+      setStatusColor("#94A3B8")
     } else if (Math.abs(tuningAccuracy) < 5) {
       setStatusText("¡Afinado!")
-      setStatusColor("#4ADE80") // green-400
+      setStatusColor("#4ADE80")
     } else if (tuningAccuracy < 0) {
       setStatusText("Demasiado bajo")
-      setStatusColor("#FBBF24") // amber-400
+      setStatusColor("#FBBF24")
     } else {
       setStatusText("Demasiado alto")
-      setStatusColor("#FBBF24") // amber-400
+      setStatusColor("#FBBF24")
     }
   }, [tuningAccuracy, isListening])
 
   return (
     <View style={styles.container}>
-      {/* Indicadores ♭ y ♯ */}
       <View style={styles.rowBetween}>
         <Text style={styles.hintText}>♭ Bajo</Text>
         <Text style={styles.hintText}>Alto ♯</Text>
       </View>
 
-      {/* Medidor */}
       <View style={styles.meterContainer}>
         <View style={styles.meterTrack}>
           <View style={styles.centerLine} />
@@ -56,15 +71,19 @@ export default function TunerDisplay({
           style={[
             styles.needle,
             {
-              transform: [{ rotate: `${needleRotation}deg` }],
+              transform: [
+                { translateY: needleHeight / 2 - 8 },
+                { rotate },
+                { translateY: -needleHeight / 2 + 8 },
+              ],
             },
           ]}
         />
 
+
         <View style={styles.centerPoint} />
       </View>
 
-      {/* Notas y estado */}
       <View style={styles.noteDisplay}>
         <View style={styles.noteRow}>
           <Text style={styles.currentNote}>{currentNote || "-"}</Text>
@@ -100,7 +119,7 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 14,
-    color: "#94A3B8", // slate-400
+    color: "#94A3B8",
   },
   meterContainer: {
     height: 130,
@@ -112,7 +131,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: 8,
-    backgroundColor: "#334155", // slate-700
+    backgroundColor: "#334155",
     borderRadius: 4,
     justifyContent: "center",
     alignItems: "center",
@@ -121,14 +140,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: 16,
     width: 2,
-    backgroundColor: "#CBD5E1", // slate-300
+    backgroundColor: "#CBD5E1",
   },
   needle: {
     position: "absolute",
     bottom: 0,
-    height: 96,
+    height: needleHeight,
     width: 2,
-    backgroundColor: "#EF4444", // red-500
+    backgroundColor: "#EF4444",
     borderTopLeftRadius: 4,
     borderTopRightRadius: 4,
   },
@@ -137,9 +156,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: 16,
     width: 16,
-    backgroundColor: "#0F172A", // slate-800
+    backgroundColor: "#0F172A",
     borderWidth: 2,
-    borderColor: "#EF4444", // red-500
+    borderColor: "#EF4444",
     borderRadius: 999,
   },
   noteDisplay: {
@@ -157,7 +176,7 @@ const styles = StyleSheet.create({
   },
   targetNote: {
     fontSize: 24,
-    color: "#94A3B8", // slate-400
+    color: "#94A3B8",
   },
   statusText: {
     marginTop: 8,
@@ -167,6 +186,6 @@ const styles = StyleSheet.create({
   frequencyText: {
     marginTop: 4,
     fontSize: 14,
-    color: "#94A3B8", // slate-400
+    color: "#94A3B8",
   },
 })
