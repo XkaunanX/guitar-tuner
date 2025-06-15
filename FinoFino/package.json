@@ -43,6 +43,8 @@
     "react-native": "0.79.2",
     "react-native-css-interop": "^0.1.22",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-permissions": "^3.10.1",
+    "react-native-pitch-detector": "^0.1.6",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "~4.10.0",
@@ -59,5 +61,8 @@
     "jscodeshift": "^0.15.2",
     "typescript": "~5.8.3"
   },
+  "reactNativePermissionsIOS": [
+    "Microphone"
+  ],
   "private": true
 }

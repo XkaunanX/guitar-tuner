@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, Alert, StyleSheet, ScrollView } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { View, Text, TouchableOpacity, Alert, StyleSheet, ScrollView, PermissionsAndroid, Platform } from 'react-native'
 import { Guitar, Mic, MicOff, Volume2, VolumeX } from 'lucide-react-native'
+import { PitchDetector } from 'react-native-pitch-detector'
 
 // Importacion de los componentes reutilizables
 import TunerDisplay from '../components/TunerDisplay'
@@ -15,21 +16,76 @@ const guitarStrings = [
   { name: "E", frequency: 329.63, string: "1 (E agudo)" },
 ]
 
+async function requestAudioPermission() {
+  if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      {
+        title: 'Permiso de Microfono',
+        message: 'La app necesita acceso al microfono para detectar el tono',
+        buttonNeutral: 'Preguntarme despues',
+        buttonNegative: 'Cancelar',
+        buttonPositive: 'Aceptar',
+      },
+    )
+    return granted === PermissionsAndroid.RESULTS.GRANTED
+  }
+  return true
+}
+
 export default function GuitarTunerScreen() {
   const [targetNote, setTargetNote] = useState('E')
   const [isListening, setIsListening] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
+  const [detectedFrequency, setDetectedFrequency] = useState<number | null>(null)
+  const [detectedTone, setDetectedTone] = useState<string | null>(null)
 
-  const selectedString = guitarStrings.find(s => s.name === targetNote)
-  const targetFrequency = selectedString ? selectedString.frequency : 0
+  useEffect(() => {
+    return () => {
+      // cleanup on unmount
+      PitchDetector.stop()
+      PitchDetector.removeListener()
+    }
+  }, [])
+
+  const startListening = async () => {
+    const hasPermission = await requestAudioPermission()
+    if (!hasPermission) {
+      Alert.alert('Permiso denegado para usar el microfono')
+      return
+    }
+
+    PitchDetector.addListener(({ frequency, tone }) => {
+      console.log('Frecuencia detectada:', frequency, 'Tono detectado:', tone)  // <--- Agregado console.log aquí
+      setDetectedFrequency(frequency)
+      setDetectedTone(tone)
+    })
+
+    try {
+      await PitchDetector.start()
+      setIsListening(true)
+    } catch (error) {
+      Alert.alert('Error al iniciar la detección de tono')
+    }
+  }
+
+  const stopListening = async () => {
+    await PitchDetector.stop()
+    PitchDetector.removeListener()
+    setIsListening(false)
+    setDetectedFrequency(null)
+    setDetectedTone(null)
+  }
 
   const toggleListening = () => {
-    Alert.alert('Toggle Listening')
-    setIsListening(!isListening)
+    if (isListening) {
+      stopListening()
+    } else {
+      startListening()
+    }
   }
 
   const toggleMute = () => {
-    Alert.alert('Toggle Mute')
     setIsMuted(!isMuted)
   }
 
@@ -37,6 +93,9 @@ export default function GuitarTunerScreen() {
     setTargetNote(note)
     Alert.alert(`Cuerda seleccionada: ${note}`)
   }
+
+  const selectedString = guitarStrings.find(s => s.name === targetNote)
+  const targetFrequency = selectedString ? selectedString.frequency : 0
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -46,10 +105,10 @@ export default function GuitarTunerScreen() {
 
       <View style={styles.card}>
         <TunerDisplay
-          currentNote={targetNote}
+          currentNote={detectedTone || targetNote}
           targetNote={targetNote}
-          tuningAccuracy={0} // cambiar por el valor real cuando lo tengas
-          frequency={targetFrequency}
+          tuningAccuracy={0} // puedes calcular la diferencia entre detectedFrequency y targetFrequency para esto
+          frequency={detectedFrequency || 0}
           isListening={isListening}
         />
 
@@ -90,7 +149,8 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#0f172a',
     flexGrow: 1,
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 22,
