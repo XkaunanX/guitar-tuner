@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TouchableOpacity, Alert, StyleSheet, ScrollView, PermissionsAndroid, Platform } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ScrollView,
+  PermissionsAndroid,
+  Platform,
+} from 'react-native'
 import { Guitar, Mic, MicOff, Volume2, VolumeX } from 'lucide-react-native'
 import { PitchDetector } from 'react-native-pitch-detector'
 
@@ -33,7 +42,7 @@ async function requestAudioPermission() {
 }
 
 export default function GuitarTunerScreen() {
-  const [targetNote, setTargetNote] = useState('E')
+  const [targetString, setTargetString] = useState(guitarStrings[0])
   const [isListening, setIsListening] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [detectedFrequency, setDetectedFrequency] = useState<number | null>(null)
@@ -54,7 +63,6 @@ export default function GuitarTunerScreen() {
     }
 
     PitchDetector.addListener(({ frequency, tone }) => {
-      console.log('Frecuencia detectada:', frequency, 'Tono detectado:', tone)
       setDetectedFrequency(frequency)
       setDetectedTone(tone)
     })
@@ -87,12 +95,13 @@ export default function GuitarTunerScreen() {
     setIsMuted(!isMuted)
   }
 
-  const handleStringSelect = (note: string) => {
-    setTargetNote(note)
+  const handleStringSelect = (stringLabel: string) => {
+    const selected = guitarStrings.find(s => s.string === stringLabel)
+    if (selected) setTargetString(selected)
   }
 
-  const selectedString = guitarStrings.find(s => s.name === targetNote)
-  const targetFrequency = selectedString ? selectedString.frequency : 0
+  const targetNote = targetString.name
+  const targetFrequency = targetString.frequency
 
   const getTuningAccuracy = (detected: number, target: number): number => {
     if (!detected || !target) return 0
@@ -120,7 +129,7 @@ export default function GuitarTunerScreen() {
 
         <StringSelector
           strings={guitarStrings}
-          currentString={targetNote}
+          currentString={targetString.string}
           onSelectString={handleStringSelect}
         />
 

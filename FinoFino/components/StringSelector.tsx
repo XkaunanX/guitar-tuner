@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
 interface StringSelectorProps {
   strings: { name: string; frequency: number; string: string }[]
   currentString: string
-  onSelectString: (note: string) => void
+  onSelectString: (stringLabel: string) => void
 }
 
 export default function StringSelector({
@@ -18,11 +18,11 @@ export default function StringSelector({
   const renderRow = (row: typeof strings) => (
     <View style={styles.row}>
       {row.map((string, index) => {
-        const isSelected = currentString === string.name
+        const isSelected = currentString === string.string
         return (
           <TouchableOpacity
             key={index}
-            onPress={() => onSelectString(string.name)}
+            onPress={() => onSelectString(string.string)}
             style={[
               styles.button,
               isSelected ? styles.selectedButton : styles.unselectedButton,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#94A3B8",
     marginBottom: 8,
-    marginTop:8,
+    marginTop: 8,
   },
   row: {
     flexDirection: "row",
