@@ -18,12 +18,12 @@ export default function RootLayout() {
   }
 
   return (
-    <GluestackUIProvider mode="light">
+    <GluestackUIProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       </ThemeProvider>
     </GluestackUIProvider>
   );

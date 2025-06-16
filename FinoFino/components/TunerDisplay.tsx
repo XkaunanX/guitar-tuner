@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef } from "react"
+import React from "react"
 import { View, Text, Animated, StyleSheet } from "react-native"
+import { useTunerStatus } from "../hooks/useTunerStatus"
 
 const needleHeight = 96
 
@@ -18,42 +19,7 @@ export default function TunerDisplay({
   frequency,
   isListening,
 }: TunerDisplayProps) {
-  const clampedAccuracy = Math.max(-50, Math.min(50, tuningAccuracy))
-  const rotationValue = useRef(new Animated.Value(clampedAccuracy)).current
-
-  const [statusText, setStatusText] = useState("Esperando...")
-  const [statusColor, setStatusColor] = useState("#94A3B8") // slate-400
-
-  useEffect(() => {
-    Animated.spring(rotationValue, {
-      toValue: clampedAccuracy,
-      useNativeDriver: true,
-      tension: 50,
-      friction: 7,
-    }).start()
-  }, [clampedAccuracy])
-
-  const rotate = rotationValue.interpolate({
-    inputRange: [-50, 0, 50],
-    outputRange: ["-45deg", "0deg", "45deg"],
-    extrapolate: "clamp",
-  })
-
-  useEffect(() => {
-    if (!isListening) {
-      setStatusText("Esperando...")
-      setStatusColor("#94A3B8")
-    } else if (Math.abs(tuningAccuracy) < 5) {
-      setStatusText("¡Afinado!")
-      setStatusColor("#4ADE80")
-    } else if (tuningAccuracy < 0) {
-      setStatusText("Demasiado bajo")
-      setStatusColor("#FBBF24")
-    } else {
-      setStatusText("Demasiado alto")
-      setStatusColor("#FBBF24")
-    }
-  }, [tuningAccuracy, isListening])
+  const { rotate, statusText, statusColor } = useTunerStatus(tuningAccuracy, isListening)
 
   return (
     <View style={styles.container}>
@@ -79,7 +45,6 @@ export default function TunerDisplay({
             },
           ]}
         />
-
 
         <View style={styles.centerPoint} />
       </View>
