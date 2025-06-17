@@ -8,7 +8,7 @@ import {
   useColorScheme,
   Image,
 } from "react-native"
-import { Mic, MicOff, Volume2, VolumeX } from "lucide-react-native"
+import { Mic, MicOff } from "lucide-react-native"
 
 import TunerDisplay from "../components/TunerDisplay"
 import StringSelector from "../components/StringSelector"
@@ -25,9 +25,7 @@ export default function GuitarTunerScreen() {
     detectedFrequency,
     detectedTone,
     isListening,
-    isMuted,
     toggleListening,
-    toggleMute,
     handleStringSelect,
   } = useGuitarTuner()
 
@@ -71,18 +69,6 @@ export default function GuitarTunerScreen() {
               <MicOff color="white" size={20} />
             ) : (
               <Mic color="white" size={20} />
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={toggleMute}
-            style={styles.muteButton}
-            disabled={!isListening}
-          >
-            {isMuted ? (
-              <VolumeX color="white" size={20} />
-            ) : (
-              <Volume2 color="white" size={20} />
             )}
           </TouchableOpacity>
         </View>
@@ -132,10 +118,8 @@ const darkStyles = StyleSheet.create({
     marginTop: 24,
   },
   controls: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
     marginTop: 24,
+    alignItems: "center",
   },
   listenButton: {
     width: 64,
@@ -149,15 +133,6 @@ const darkStyles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: "#ef4444",
-  },
-  muteButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#334155",
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 16,
   },
   instructions: {
     marginTop: 24,
@@ -203,10 +178,8 @@ const lightStyles = StyleSheet.create({
     marginTop: 24,
   },
   controls: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
     marginTop: 24,
+    alignItems: "center",
   },
   listenButton: {
     width: 64,
@@ -220,15 +193,6 @@ const lightStyles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: "#ef4444",
-  },
-  muteButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#9ca3af",
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 16,
   },
   instructions: {
     marginTop: 24,
