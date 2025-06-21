@@ -1,0 +1,55 @@
+node_modules
+.expo
+.expo-shared
+.git
+android/.gradle
+android/.idea
+ios/Pods
+android/app/build
+ios/build
+*.zip
+*.mp3
+*.wav
+*.psd
+*.ai
+*.apk
+*.ipa
+
+# Dependencias que pueden ser reinstaladas
+node_modules
+*.log
+
+# Builds locales
+build
+dist
+web-build
+android/app/build
+ios/build
+
+# Configuracion de IDEs
+.vscode
+.idea
+
+# Archivos sensibles o innecesarios
+.env
+.env.*
+*.key
+*.jks
+
+# Imágenes o multimedia pesadas de prueba
+assets/tmp
+assets/*.psd
+assets/*.raw
+assets/*.wav
+assets/*.mp4
+
+# Archivos personales
+*.iml
+*.bak
+*.tmp
+.DS_Store
+
+# Archivos de Git y EAS
+.git
+.gitignore
+.easignore
